@@ -86,7 +86,7 @@ export default function CreateGoal() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-secondary">
+    <div className="bg-surface-secondary">
       {/* Header */}
       <div className="bg-surface flex items-center" style={{ padding: "var(--spacing-md) var(--spacing-lg)", paddingTop: 56, gap: "var(--spacing-sm)" }}>
         <button

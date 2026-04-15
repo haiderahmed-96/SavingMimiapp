@@ -5,7 +5,7 @@ export default function Profile() {
   const userId = getUserId();
 
   return (
-    <div className="min-h-screen bg-surface-secondary">
+    <div className="bg-surface-secondary">
       {/* Green Header */}
       <div
         className="relative overflow-hidden text-center"

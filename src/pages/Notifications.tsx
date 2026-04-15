@@ -31,7 +31,7 @@ export default function Notifications() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-secondary">
+    <div className="bg-surface-secondary">
       <div className="bg-surface" style={{ padding: "var(--spacing-md) var(--spacing-lg)", paddingTop: 56 }}>
         <div className="flex items-center justify-between">
           <h1 className="text-[18px] font-bold text-text">الإشعارات</h1>

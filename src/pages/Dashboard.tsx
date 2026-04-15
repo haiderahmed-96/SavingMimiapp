@@ -1,18 +1,24 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGoalStore } from "../stores/useGoalStore";
+import { useUIStore } from "../stores/useUIStore";
+import { transactionService } from "../services/transactionService";
 import { formatAmount } from "../utils/format";
 import GoalCard from "../components/GoalCard";
+import DepositModal from "../components/DepositModal";
 import { GoalCardSkeleton } from "../components/Skeleton";
 import EmptyState from "../components/EmptyState";
-import { Bell, ChevronLeft, Target, TrendingUp, Trophy } from "lucide-react";
+import { Bell, ChevronLeft, Plus, Target, TrendingUp, Trophy } from "lucide-react";
 import { useNotificationStore } from "../stores/useNotificationStore";
+import type { SavingGoal } from "../types";
 
 export default function Dashboard() {
   const { goals, loading, fetchGoals } = useGoalStore();
+  const { showToast, triggerCelebration } = useUIStore();
   const navigate = useNavigate();
   const unreadCount = useNotificationStore((s) => s.unreadCount);
+  const [depositGoal, setDepositGoal] = useState<SavingGoal | null>(null);
 
   useEffect(() => {
     fetchGoals();
@@ -26,7 +32,7 @@ export default function Dashboard() {
   const overallProgress = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-surface-secondary">
+    <div className="bg-surface-secondary">
       {/* ── Header ── */}
       <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #0D9E6C 0%, #087A52 100%)", minHeight: 200 }}>
         <div className="absolute top-0 left-0 w-40 h-40 rounded-full bg-white/5 -translate-x-1/2 -translate-y-1/2" />
@@ -131,12 +137,47 @@ export default function Dashboard() {
           ) : (
             <div className="flex flex-col" style={{ gap: "var(--spacing-sm)" }}>
               {activeGoals.slice(0, 4).map((goal) => (
-                <GoalCard key={goal.id} goal={goal} />
+                <GoalCard key={goal.id} goal={goal} onDepositClick={setDepositGoal} />
               ))}
             </div>
           )}
+
+          {/* Create Goal Button */}
+          <button
+            onClick={() => navigate("/goals/new")}
+            className="w-full flex items-center justify-center text-[13px] font-semibold text-white bg-primary active:scale-[0.97] transition-transform"
+            style={{ gap: "var(--spacing-xs)", padding: "var(--spacing-md)", borderRadius: "var(--radius-md)", marginTop: "var(--spacing-md)" }}
+          >
+            <Plus size={16} />
+            إنشاء هدف
+          </button>
         </div>
       </div>
+
+      {/* Quick Deposit Modal */}
+      {depositGoal && (
+        <DepositModal
+          open={!!depositGoal}
+          onClose={() => setDepositGoal(null)}
+          goalName={depositGoal.goalName}
+          currentAmount={depositGoal.currentAmount}
+          targetAmount={depositGoal.targetAmount}
+          onDeposit={async (amount) => {
+            try {
+              await transactionService.deposit(depositGoal.id, amount);
+              showToast("تم الإيداع بنجاح");
+              setDepositGoal(null);
+              await fetchGoals();
+              const updated = goals.find((g) => g.id === depositGoal.id);
+              if (updated && updated.currentAmount + amount >= updated.targetAmount) {
+                triggerCelebration();
+              }
+            } catch (err: unknown) {
+              showToast((err as { error?: string })?.error || "فشل الإيداع", "error");
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

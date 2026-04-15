@@ -2,24 +2,26 @@ import { useNavigate } from "react-router-dom";
 import { SavingTypeMap, SavingStatusMap } from "../types/enums";
 import type { SavingGoal } from "../types";
 import { formatAmount, calcProgress } from "../utils/format";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Plus } from "lucide-react";
 
 interface GoalCardProps {
   goal: SavingGoal;
+  onDepositClick?: (goal: SavingGoal) => void;
 }
 
-export default function GoalCard({ goal }: GoalCardProps) {
+export default function GoalCard({ goal, onDepositClick }: GoalCardProps) {
   const navigate = useNavigate();
   const type = SavingTypeMap[goal.savingType] || SavingTypeMap.FixedDaily;
   const status = SavingStatusMap[goal.status] || SavingStatusMap.Active;
   const progress = Math.min(100, goal.progressPercent ?? calcProgress(goal.currentAmount, goal.targetAmount));
   const accentColor = type.color;
+  const canDeposit = goal.status === "Active" && onDepositClick;
 
   return (
-    <button
+    <div
+      className="group w-full text-start card transition-all duration-200 active:scale-[0.98] relative"
+      style={{ padding: "var(--spacing-md)", display: "flex", alignItems: "center", gap: "var(--spacing-sm)", cursor: "pointer" }}
       onClick={() => navigate(`/goals/${goal.id}`)}
-      className="group w-full text-start card transition-all duration-200 active:scale-[0.98]"
-      style={{ padding: "var(--spacing-md)", display: "flex", alignItems: "center", gap: "var(--spacing-sm)" }}
     >
       {/* Icon */}
       <div
@@ -74,6 +76,29 @@ export default function GoalCard({ goal }: GoalCardProps) {
       </div>
 
       <ChevronLeft size={14} className="text-text-muted shrink-0 opacity-40 group-hover:opacity-100 transition-opacity" />
-    </button>
+
+      {/* Quick deposit button */}
+      {canDeposit && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDepositClick(goal);
+          }}
+          className="absolute flex items-center justify-center text-white active:scale-90 transition-transform"
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: "var(--radius-sm)",
+            background: accentColor,
+            bottom: 10,
+            left: 10,
+            boxShadow: `0 2px 8px ${accentColor}40`,
+          }}
+          aria-label="إيداع سريع"
+        >
+          <Plus size={15} strokeWidth={2.5} />
+        </button>
+      )}
+    </div>
   );
 }

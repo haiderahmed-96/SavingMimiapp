@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGoalStore } from "../stores/useGoalStore";
+import { useUIStore } from "../stores/useUIStore";
+import { transactionService } from "../services/transactionService";
 import GoalCard from "../components/GoalCard";
+import DepositModal from "../components/DepositModal";
 import { GoalCardSkeleton } from "../components/Skeleton";
 import EmptyState from "../components/EmptyState";
 import { SavingStatusMap } from "../types/enums";
+import type { SavingGoal } from "../types";
 import { Plus } from "lucide-react";
 
 const STATUS_FILTERS = [
@@ -17,7 +21,9 @@ const STATUS_FILTERS = [
 
 export default function GoalsList() {
   const { goals, loading, fetchGoals } = useGoalStore();
+  const { showToast, triggerCelebration } = useUIStore();
   const [filter, setFilter] = useState("");
+  const [depositGoal, setDepositGoal] = useState<SavingGoal | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,7 +33,7 @@ export default function GoalsList() {
   const filtered = filter === "" ? goals : goals.filter((g) => g.status === filter);
 
   return (
-    <div className="min-h-screen bg-surface-secondary">
+    <div className="bg-surface-secondary">
       {/* Header */}
       <div className="bg-surface" style={{ padding: "var(--spacing-md) var(--spacing-lg)", paddingTop: 56 }}>
         <div className="flex items-center justify-between" style={{ marginBottom: "var(--spacing-md)" }}>
@@ -89,11 +95,36 @@ export default function GoalsList() {
         ) : (
           <div className="flex flex-col" style={{ gap: "var(--spacing-sm)" }}>
             {filtered.map((goal) => (
-              <GoalCard key={goal.id} goal={goal} />
+              <GoalCard key={goal.id} goal={goal} onDepositClick={setDepositGoal} />
             ))}
           </div>
         )}
       </div>
+
+      {/* Quick Deposit Modal */}
+      {depositGoal && (
+        <DepositModal
+          open={!!depositGoal}
+          onClose={() => setDepositGoal(null)}
+          goalName={depositGoal.goalName}
+          currentAmount={depositGoal.currentAmount}
+          targetAmount={depositGoal.targetAmount}
+          onDeposit={async (amount) => {
+            try {
+              await transactionService.deposit(depositGoal.id, amount);
+              showToast("تم الإيداع بنجاح");
+              setDepositGoal(null);
+              await fetchGoals();
+              const updated = goals.find((g) => g.id === depositGoal.id);
+              if (updated && updated.currentAmount + amount >= updated.targetAmount) {
+                triggerCelebration();
+              }
+            } catch (err: unknown) {
+              showToast((err as { error?: string })?.error || "فشل الإيداع", "error");
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

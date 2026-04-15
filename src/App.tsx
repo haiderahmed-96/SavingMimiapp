@@ -22,7 +22,7 @@ export default function App() {
 
   return (
     <div className="min-h-dvh bg-surface-secondary text-text">
-      <div className="pb-[72px]">
+      <div style={{ paddingBottom: "calc(68px + env(safe-area-inset-bottom, 0px) + 16px)" }}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/goals" element={<GoalsList />} />

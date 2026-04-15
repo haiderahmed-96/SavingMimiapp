@@ -134,7 +134,7 @@ export default function GoalDetails() {
   const daysLeft = Math.max(0, Math.ceil((deadlineDate.getTime() - now.getTime()) / 86400000));
 
   return (
-    <div className="min-h-screen bg-surface-secondary">
+    <div className="bg-surface-secondary">
       {/* Header */}
       <div className="bg-surface flex items-center justify-between" style={{ padding: "var(--spacing-md) var(--spacing-lg)", paddingTop: 56 }}>
         <button onClick={() => navigate(-1)} className="w-9 h-9 flex items-center justify-center bg-surface-secondary active:scale-95 transition-transform" style={{ borderRadius: "var(--radius-sm)" }}>
