@@ -2,6 +2,7 @@ import { useState } from "react";
 import Modal from "./Modal";
 import { formatAmount } from "../utils/format";
 import { Plus } from "lucide-react";
+import { isInSuperQi, tradePay, TradePayResultCode, alert as sqAlert } from "../services/superqiService";
 
 interface DepositModalProps {
   open: boolean;
@@ -11,11 +12,17 @@ interface DepositModalProps {
   targetAmount: number;
   dailyAmount?: number | null;
   onDeposit: (amount: number) => Promise<void>;
+  /**
+   * Optional: when provided and the app is running inside Super Qi, the modal
+   * launches the Super Qi cashier using the returned paymentUrl. `onDeposit`
+   * is only invoked after a successful payment (resultCode 9000).
+   */
+  preparePayment?: (amount: number) => Promise<string>;
 }
 
 const QUICK_AMOUNTS = [5000, 10000, 25000, 50000, 100000];
 
-export default function DepositModal({ open, onClose, goalName, currentAmount, targetAmount, dailyAmount, onDeposit }: DepositModalProps) {
+export default function DepositModal({ open, onClose, goalName, currentAmount, targetAmount, dailyAmount, onDeposit, preparePayment }: DepositModalProps) {
   const [amount, setAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -26,10 +33,24 @@ export default function DepositModal({ open, onClose, goalName, currentAmount, t
 
   const handleSubmit = async () => {
     if (!amount || Number(amount) <= 0) return;
+    const value = Number(amount);
     setSubmitting(true);
     try {
-      await onDeposit(Number(amount));
-      setAmount("");
+      if (preparePayment && isInSuperQi()) {
+        const paymentUrl = await preparePayment(value);
+        const res = await tradePay(paymentUrl);
+        if (res.resultCode === TradePayResultCode.SUCCESS) {
+          await onDeposit(value);
+          setAmount("");
+        } else if (res.resultCode === TradePayResultCode.CANCEL) {
+          // User cancelled — silent no-op.
+        } else {
+          await sqAlert(`فشل الدفع (رمز: ${res.resultCode})`, "الدفع");
+        }
+      } else {
+        await onDeposit(value);
+        setAmount("");
+      }
     } finally {
       setSubmitting(false);
     }

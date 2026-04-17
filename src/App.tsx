@@ -13,6 +13,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { useNotificationStore } from "./stores/useNotificationStore";
 import { useAuthStore } from "./stores/useAuthStore";
+import { isInSuperQi, getAuthCode } from "./services/superqiService";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -27,10 +28,31 @@ export default function App() {
   const fetchUnreadCount = useNotificationStore((s) => s.fetchUnreadCount);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const loadSession = useAuthStore((s) => s.loadSession);
+  const qiLogin = useAuthStore((s) => s.qiLogin);
 
   useEffect(() => {
     loadSession();
   }, [loadSession]);
+
+  // Silent Super Qi auth: if running inside the Super Qi host and no session
+  // exists yet, request an auth_base code and exchange it via the backend.
+  useEffect(() => {
+    if (isAuthenticated) return;
+    if (!isInSuperQi()) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const authCode = await getAuthCode(["auth_base"]);
+        if (cancelled || !authCode) return;
+        await qiLogin(authCode);
+      } catch (err) {
+        console.warn("[SuperQi] silent auth skipped", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, qiLogin]);
 
   useEffect(() => {
     if (!isAuthenticated) return;

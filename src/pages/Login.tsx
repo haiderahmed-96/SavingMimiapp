@@ -2,18 +2,34 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/useAuthStore";
 import { Eye, EyeOff, Phone, Lock } from "lucide-react";
+import { isInSuperQi, getAuthCode } from "../services/superqiService";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, loading, error } = useAuthStore();
+  const { login, qiLogin, loading, error } = useAuthStore();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [qiLoading, setQiLoading] = useState(false);
+  const canUseSuperQi = isInSuperQi();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const ok = await login(phone, password);
     if (ok) navigate("/", { replace: true });
+  };
+
+  const handleSuperQiLogin = async () => {
+    setQiLoading(true);
+    try {
+      const authCode = await getAuthCode(["auth_base", "auth_user"]);
+      const ok = await qiLogin(authCode);
+      if (ok) navigate("/", { replace: true });
+    } catch (err) {
+      console.warn("[SuperQi] login failed", err);
+    } finally {
+      setQiLoading(false);
+    }
   };
 
   return (
@@ -87,6 +103,25 @@ export default function Login() {
               {loading ? "جاري الدخول..." : "تسجيل الدخول"}
             </button>
           </form>
+
+          {canUseSuperQi && (
+            <>
+              <div className="flex items-center" style={{ gap: "var(--spacing-sm)", marginTop: "var(--spacing-lg)", marginBottom: "var(--spacing-md)" }}>
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-[12px] text-text-muted">أو</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+              <button
+                type="button"
+                onClick={handleSuperQiLogin}
+                disabled={qiLoading || loading}
+                className="w-full h-[52px] font-bold text-[15px] text-text disabled:opacity-50 active:scale-[0.98] transition-all flex items-center justify-center"
+                style={{ borderRadius: "var(--radius-md)", border: "1.5px solid var(--color-border)", background: "var(--color-surface)", gap: "var(--spacing-sm)" }}
+              >
+                {qiLoading ? "جاري الدخول عبر Qi..." : "تسجيل الدخول عبر Super Qi"}
+              </button>
+            </>
+          )}
         </div>
 
         <div className="text-center" style={{ marginTop: "var(--spacing-lg)", marginBottom: "var(--spacing-xl)" }}>
