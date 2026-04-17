@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/useAuthStore";
-import { Eye, EyeOff, Phone, Lock, User, PiggyBank } from "lucide-react";
+import { Eye, EyeOff, Phone, Lock, User } from "lucide-react";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -24,9 +24,6 @@ export default function Register() {
         className="text-center"
         style={{ padding: "var(--spacing-lg)", paddingTop: "var(--spacing-2xl)", paddingBottom: 80, background: "linear-gradient(180deg, #0D9E6C 0%, #087A52 100%)", borderRadius: "0 0 var(--radius-xl) var(--radius-xl)" }}
       >
-        <div className="w-16 h-16 bg-white/20 flex items-center justify-center mx-auto" style={{ borderRadius: "var(--radius-lg)", marginBottom: "var(--spacing-md)" }}>
-          <PiggyBank size={32} className="text-white" />
-        </div>
         <h1 className="text-white text-[26px] font-bold" style={{ marginBottom: "var(--spacing-xs)" }}>القاصة</h1>
         <p className="text-white/70 text-[14px]">إنشاء حساب جديد</p>
       </div>
@@ -53,7 +50,7 @@ export default function Register() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="أحمد محمد"
-                  className="input-field" style={{ paddingInlineStart: "var(--spacing-md)", paddingInlineEnd: 44 }}
+                  className="input-field" style={{ paddingRight: 44, paddingLeft: "var(--spacing-md)" }}
                   required
                 />
               </div>
@@ -83,8 +80,7 @@ export default function Register() {
                   type={showPass ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="input-field" style={{ paddingInlineStart: "var(--spacing-md)", paddingInlineEnd: 44 }}
+                  className="input-field" style={{ paddingInlineStart: 44, paddingInlineEnd: 44 }}
                   dir="ltr"
                   required
                 />

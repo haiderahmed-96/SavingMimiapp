@@ -75,7 +75,7 @@ export default function Notifications() {
                   )}
                   <span className="text-lg shrink-0 mt-0.5">{typeInfo.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-text truncate">{n.title}</p>
+                    <p className="text-[13px] font-semibold text-text truncate">{typeInfo.label || n.title}</p>
                     <p className="text-[11px] text-text-muted mt-0.5 line-clamp-2">{n.message}</p>
                     <p className="text-[10px] text-text-muted mt-1">{timeAgo(n.createdAt)}</p>
                   </div>

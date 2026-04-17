@@ -13,6 +13,15 @@ interface NotificationState {
   deleteNotification: (id: number) => Promise<void>;
 }
 
+function toItems<T>(raw: unknown): T[] {
+  if (Array.isArray(raw)) return raw as T[];
+  if (raw && typeof raw === "object") {
+    const r = raw as { items?: T[]; $values?: T[] };
+    return r.items ?? r.$values ?? [];
+  }
+  return [];
+}
+
 export const useNotificationStore = create<NotificationState>((set, get) => ({
   notifications: [],
   unreadCount: 0,
@@ -21,9 +30,8 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   fetchNotifications: async () => {
     set({ loading: true });
     try {
-      const raw = await notificationService.getAll();
-      const notifications = Array.isArray(raw) ? raw : (raw as unknown as { $values?: Notification[] }).$values ?? [];
-      set({ notifications, loading: false });
+      const raw = await notificationService.getAll(1, 100);
+      set({ notifications: toItems<Notification>(raw), loading: false });
     } catch {
       set({ loading: false });
     }

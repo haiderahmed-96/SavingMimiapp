@@ -1,8 +1,17 @@
-import { getUserId } from "../services/api";
-import { User, Hash, ShieldCheck, Info } from "lucide-react";
+import { useAuthStore } from "../stores/useAuthStore";
+import { User, Hash, ShieldCheck, Info, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
-  const userId = getUserId();
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+  const userId = user?.id ?? "-";
+  const fullName = user?.fullName || "مستخدم";
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div className="bg-surface-secondary">
@@ -35,7 +44,7 @@ export default function Profile() {
         </div>
 
         <h2 className="text-[20px] font-bold text-white" style={{ marginBottom: "var(--spacing-xs)" }}>
-          مستخدم
+          {fullName}
         </h2>
         <p className="text-white/50 text-[13px] tabular-nums">ID: {userId}</p>
       </div>
@@ -128,6 +137,20 @@ export default function Profile() {
         >
           القاصة — تطبيق إدارة الادخار
         </p>
+
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center text-[13px] font-semibold text-danger bg-surface border border-danger/30 active:scale-[0.97] transition-transform"
+          style={{
+            gap: "var(--spacing-xs)",
+            padding: "var(--spacing-md)",
+            borderRadius: "var(--radius-md)",
+            marginTop: "var(--spacing-md)",
+          }}
+        >
+          <LogOut size={16} />
+          تسجيل الخروج
+        </button>
       </div>
     </div>
   );

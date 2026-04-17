@@ -1,32 +1,37 @@
-import { apiFetch, getUserId } from "./api";
+import { apiFetch } from "./api";
 import type {
   SavingGoal,
   GoalDetails,
   CreateGoalRequest,
   UpdateGoalRequest,
+  PagedResult,
+  UserSummary,
 } from "../types";
 
 export const goalService = {
-  getAll: () =>
-    apiFetch<SavingGoal[]>(`/api/saving-goals?userId=${getUserId()}`),
+  getAll: (page = 1, pageSize = 20) =>
+    apiFetch<PagedResult<SavingGoal>>(
+      `/api/saving-goals?page=${page}&pageSize=${pageSize}`
+    ),
 
-  getById: (id: number) =>
-    apiFetch<GoalDetails>(`/api/saving-goals/${id}?userId=${getUserId()}`),
+  getArchived: (page = 1, pageSize = 20) =>
+    apiFetch<PagedResult<SavingGoal>>(
+      `/api/saving-goals/archived?page=${page}&pageSize=${pageSize}`
+    ),
 
-  create: (data: Omit<CreateGoalRequest, "userId">) =>
+  getById: (id: number) => apiFetch<GoalDetails>(`/api/saving-goals/${id}`),
+
+  create: (data: CreateGoalRequest) =>
     apiFetch<{ id: number; message: string }>("/api/saving-goals", {
       method: "POST",
-      body: JSON.stringify({ ...data, userId: getUserId() }),
+      body: JSON.stringify(data),
     }),
 
-  update: (id: number, data: Omit<UpdateGoalRequest, "userId">) =>
+  update: (id: number, data: UpdateGoalRequest) =>
     apiFetch<{ message: string }>(`/api/saving-goals/${id}`, {
       method: "PUT",
-      body: JSON.stringify({ ...data, userId: getUserId() }),
+      body: JSON.stringify(data),
     }),
 
-  getSummary: () =>
-    apiFetch<{ totalSaved: number; activeGoals: number; completedGoals: number; totalGoals: number }>(
-      `/api/saving-goals/summary?userId=${getUserId()}`
-    ),
+  getSummary: () => apiFetch<UserSummary>("/api/saving-goals/summary"),
 };

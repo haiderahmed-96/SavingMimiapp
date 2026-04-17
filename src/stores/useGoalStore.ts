@@ -1,19 +1,35 @@
 import { create } from "zustand";
 import { goalService } from "../services/goalService";
-import type { SavingGoal, GoalDetails } from "../types";
+import type { SavingGoal, GoalDetails, UserSummary } from "../types";
 
 interface GoalState {
   goals: SavingGoal[];
+  archivedGoals: SavingGoal[];
+  summary: UserSummary | null;
   currentGoal: GoalDetails | null;
   loading: boolean;
   error: string | null;
   fetchGoals: () => Promise<void>;
+  fetchArchivedGoals: () => Promise<void>;
+  fetchSummary: () => Promise<void>;
   fetchGoalDetails: (id: number) => Promise<void>;
   clearCurrentGoal: () => void;
 }
 
+// Tolerate both paged and legacy array responses during rollout.
+function toItems<T>(raw: unknown): T[] {
+  if (Array.isArray(raw)) return raw as T[];
+  if (raw && typeof raw === "object") {
+    const r = raw as { items?: T[]; $values?: T[] };
+    return r.items ?? r.$values ?? [];
+  }
+  return [];
+}
+
 export const useGoalStore = create<GoalState>((set) => ({
   goals: [],
+  archivedGoals: [],
+  summary: null,
   currentGoal: null,
   loading: false,
   error: null,
@@ -21,12 +37,30 @@ export const useGoalStore = create<GoalState>((set) => ({
   fetchGoals: async () => {
     set({ loading: true, error: null });
     try {
-      const raw = await goalService.getAll();
-      const goals = Array.isArray(raw) ? raw : (raw as unknown as { $values?: SavingGoal[] }).$values ?? [];
-      set({ goals, loading: false });
+      // Pull a generous first page; the backend does not enforce a hard cap.
+      const raw = await goalService.getAll(1, 100);
+      set({ goals: toItems<SavingGoal>(raw), loading: false });
     } catch (err: unknown) {
       const message = (err as { error?: string })?.error || "فشل تحميل الأهداف";
       set({ error: message, loading: false });
+    }
+  },
+
+  fetchArchivedGoals: async () => {
+    try {
+      const raw = await goalService.getArchived(1, 100);
+      set({ archivedGoals: toItems<SavingGoal>(raw) });
+    } catch {
+      // silent
+    }
+  },
+
+  fetchSummary: async () => {
+    try {
+      const summary = await goalService.getSummary();
+      set({ summary });
+    } catch {
+      // silent
     }
   },
 

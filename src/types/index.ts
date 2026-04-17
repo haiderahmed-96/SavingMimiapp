@@ -1,4 +1,16 @@
+// ── Paging ──
+export interface PagedResult<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 // ── Saving Goal ──
+// status values: "Active" | "Completed" | "Paused" | "Cancelled" | "Archived"
 export interface SavingGoal {
   id: number;
   goalName: string;
@@ -20,6 +32,14 @@ export interface Transaction {
 
 export interface GoalDetails extends SavingGoal {
   transactions: Transaction[];
+}
+
+export interface UserSummary {
+  totalSaved: number;
+  activeGoals: number;
+  completedGoals: number;
+  totalGoals: number;
+  archivedGoals?: number;
 }
 
 // ── Event Saving ──
@@ -69,11 +89,36 @@ export interface Notification {
   readAt: string | null;
 }
 
+// ── Payment Method ──
+// cardNumber is always masked by the server (e.g. "****1234").
+export interface PaymentMethod {
+  id: number;
+  userId: number;
+  cardNumber: string;
+  cardType: string;
+  balance: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
 // ── Auth ──
 export interface AuthUser {
   id: number;
   fullName: string;
   phoneNumber: string;
+  isActive?: boolean;
+  createdAt?: string;
+}
+
+export interface UserLoginResponse {
+  token: string;
+  refreshToken: string;
+  user: AuthUser;
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string;
+  refreshToken: string;
 }
 
 // ── API Error ──
@@ -83,17 +128,15 @@ export interface ApiError {
   traceId?: string;
 }
 
-// ── Request DTOs ──
+// ── Request DTOs (UserId is NEVER sent — server derives it from JWT) ──
 export interface CreateGoalRequest {
   goalName: string;
   targetAmount: number;
   durationDays: number;
   savingType: string;
-  userId: number;
 }
 
 export interface UpdateGoalRequest {
-  userId: number;
   goalName: string;
   targetAmount: number;
   durationDays: number;
@@ -101,27 +144,23 @@ export interface UpdateGoalRequest {
 
 export interface DepositRequest {
   savingGoalId: number;
-  userId: number;
   amount: number;
   contributionType: string;
 }
 
 export interface WithdrawRequest {
   savingGoalId: number;
-  userId: number;
   amount: number;
 }
 
 export interface CreateEventSavingRequest {
   savingGoalId: number;
-  userId: number;
   eventDate: string;
   eventType: number;
 }
 
 export interface CreateTravelSavingRequest {
   savingGoalId: number;
-  userId: number;
   country: string;
   currencyType: number;
   equivalentAmount: number;

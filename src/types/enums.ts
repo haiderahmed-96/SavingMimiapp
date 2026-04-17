@@ -13,6 +13,7 @@ export const SavingStatusMap: Record<string, { label: string; color: string; bg:
   Completed: { label: "مكتمل", color: "#3B82F6", bg: "rgba(59,130,246,0.1)" },
   Paused: { label: "متوقف", color: "#E5A100", bg: "rgba(229,161,0,0.1)" },
   Cancelled: { label: "ملغي", color: "#E5484D", bg: "rgba(229,72,77,0.1)" },
+  Archived: { label: "مؤرشف", color: "#64748B", bg: "rgba(100,116,139,0.1)" },
 };
 
 export const ContributionTypeMap: Record<string, { label: string; color: string }> = {
@@ -38,17 +39,18 @@ export const CurrencyTypeMap: Record<number, { name: string; label: string; symb
   5: { name: "AED", label: "درهم", symbol: "د.إ" },
 };
 
-export const NotificationTypeMap: Record<string, { icon: string }> = {
-  AmountAdded: { icon: "💰" },
-  AmountWithdrawn: { icon: "💸" },
-  GoalReached: { icon: "🏆" },
-  GoalCreated: { icon: "🎯" },
-  GroupInvitation: { icon: "👥" },
-  GroupMemberJoined: { icon: "👤" },
-  GroupMemberLeft: { icon: "👋" },
-  EventReminder: { icon: "📅" },
-  TravelPlanCreated: { icon: "✈️" },
-  MilestoneReached: { icon: "⚡" },
-  GoalFailed: { icon: "❌" },
-  SystemNotification: { icon: "🔔" },
+export const NotificationTypeMap: Record<string, { icon: string; label: string }> = {
+  AmountAdded: { icon: "💰", label: "تم إضافة مبلغ" },
+  AmountWithdrawn: { icon: "💸", label: "تم سحب مبلغ" },
+  GoalReached: { icon: "🏆", label: "تم تحقيق الهدف" },
+  GoalCreated: { icon: "🎯", label: "تم إنشاء هدف" },
+  GroupInvitation: { icon: "👥", label: "دعوة جماعية" },
+  GroupMemberJoined: { icon: "👤", label: "انضم عضو جديد" },
+  GroupMemberLeft: { icon: "👋", label: "غادر عضو" },
+  EventReminder: { icon: "📅", label: "تذكير بمناسبة" },
+  TravelPlanCreated: { icon: "✈️", label: "تم إنشاء خطة سفر" },
+  MilestoneReached: { icon: "⚡", label: "وصلت إلى مرحلة" },
+  GoalFailed: { icon: "❌", label: "فشل الهدف" },
+  SystemNotification: { icon: "🔔", label: "إشعار" },
+  GoalArchived: { icon: "📦", label: "تم أرشفة الهدف" },
 };

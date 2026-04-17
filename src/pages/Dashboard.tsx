@@ -9,7 +9,7 @@ import GoalCard from "../components/GoalCard";
 import DepositModal from "../components/DepositModal";
 import { GoalCardSkeleton } from "../components/Skeleton";
 import EmptyState from "../components/EmptyState";
-import { Bell, ChevronLeft, Plus, Target, TrendingUp, Trophy } from "lucide-react";
+import { Bell, ChevronLeft, Plus } from "lucide-react";
 import { useNotificationStore } from "../stores/useNotificationStore";
 import type { SavingGoal } from "../types";
 
@@ -27,7 +27,6 @@ export default function Dashboard() {
   const totalSaved = goals.reduce((sum, g) => sum + g.currentAmount, 0);
   const totalTarget = goals.reduce((sum, g) => sum + g.targetAmount, 0);
   const activeGoals = goals.filter((g) => g.status === "Active");
-  const completedGoals = goals.filter((g) => g.status === "Completed").length;
 
   const overallProgress = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
 
@@ -91,23 +90,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-3" style={{ gap: "var(--spacing-sm)", marginBottom: "var(--spacing-lg)" }}>
-          {[
-            { icon: <Target size={20} />, value: activeGoals.length, label: "نشط", color: "#0D9E6C", bg: "#E6F7F0" },
-            { icon: <Trophy size={20} />, value: completedGoals, label: "مكتمل", color: "#3B82F6", bg: "#EFF6FF" },
-            { icon: <TrendingUp size={20} />, value: goals.length, label: "إجمالي", color: "#7C3AED", bg: "#F5F3FF" },
-          ].map((s) => (
-            <div key={s.label} className="bg-surface text-center" style={{ borderRadius: "var(--radius-lg)", padding: "var(--spacing-md)", boxShadow: "var(--shadow-sm)" }}>
-              <div className="w-10 h-10 flex items-center justify-center mx-auto" style={{ borderRadius: "var(--radius-md)", marginBottom: "var(--spacing-sm)", background: s.bg, color: s.color }}>
-                {s.icon}
-              </div>
-              <p className="text-[20px] font-bold text-text tabular-nums">{s.value}</p>
-              <p className="text-[11px] text-text-muted" style={{ marginTop: "var(--spacing-xs)" }}>{s.label}</p>
-            </div>
-          ))}
-        </div>
-
         {/* Active Goals */}
         <div>
           <div className="flex items-center justify-between" style={{ marginBottom: "var(--spacing-md)" }}>
@@ -132,7 +114,6 @@ export default function Dashboard() {
             <EmptyState
               icon="🎯"
               message="لا توجد أهداف نشطة بعد. ابدأ بإنشاء هدف جديد!"
-              action={{ label: "إنشاء هدف", onClick: () => navigate("/goals/new") }}
             />
           ) : (
             <div className="flex flex-col" style={{ gap: "var(--spacing-sm)" }}>

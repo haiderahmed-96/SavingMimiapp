@@ -17,10 +17,11 @@ const STATUS_FILTERS = [
   { value: "Completed", label: "مكتمل" },
   { value: "Paused", label: "متوقف" },
   { value: "Cancelled", label: "ملغي" },
+  { value: "Archived", label: "مؤرشف" },
 ];
 
 export default function GoalsList() {
-  const { goals, loading, fetchGoals } = useGoalStore();
+  const { goals, archivedGoals, loading, fetchGoals, fetchArchivedGoals } = useGoalStore();
   const { showToast, triggerCelebration } = useUIStore();
   const [filter, setFilter] = useState("");
   const [depositGoal, setDepositGoal] = useState<SavingGoal | null>(null);
@@ -28,9 +29,15 @@ export default function GoalsList() {
 
   useEffect(() => {
     fetchGoals();
-  }, [fetchGoals]);
+    fetchArchivedGoals();
+  }, [fetchGoals, fetchArchivedGoals]);
 
-  const filtered = filter === "" ? goals : goals.filter((g) => g.status === filter);
+  const filtered =
+    filter === ""
+      ? goals
+      : filter === "Archived"
+      ? archivedGoals
+      : goals.filter((g) => g.status === filter);
 
   return (
     <div className="bg-surface-secondary">
